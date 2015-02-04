@@ -1,0 +1,395 @@
+
+avrcurtain.elf:     file format elf32-avr
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .text         000001b6  00000000  00000000  00000074  2**1
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  1 .data         00000002  00800060  000001b6  0000022a  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  2 .comment      00000030  00000000  00000000  0000022c  2**0
+                  CONTENTS, READONLY
+  3 .debug_aranges 00000070  00000000  00000000  0000025c  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  4 .debug_info   00000312  00000000  00000000  000002cc  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  5 .debug_abbrev 00000140  00000000  00000000  000005de  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  6 .debug_line   00000236  00000000  00000000  0000071e  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  7 .debug_frame  000000c4  00000000  00000000  00000954  2**2
+                  CONTENTS, READONLY, DEBUGGING
+  8 .debug_str    000001e2  00000000  00000000  00000a18  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  9 .debug_ranges 00000060  00000000  00000000  00000bfa  2**0
+                  CONTENTS, READONLY, DEBUGGING
+
+Disassembly of section .text:
+
+00000000 <__vectors>:
+   0:	0e c0       	rjmp	.+28     	; 0x1e <__ctors_end>
+   2:	20 c0       	rjmp	.+64     	; 0x44 <__bad_interrupt>
+   4:	1f c0       	rjmp	.+62     	; 0x44 <__bad_interrupt>
+   6:	1e c0       	rjmp	.+60     	; 0x44 <__bad_interrupt>
+   8:	1d c0       	rjmp	.+58     	; 0x44 <__bad_interrupt>
+   a:	1c c0       	rjmp	.+56     	; 0x44 <__bad_interrupt>
+   c:	1b c0       	rjmp	.+54     	; 0x44 <__bad_interrupt>
+   e:	1a c0       	rjmp	.+52     	; 0x44 <__bad_interrupt>
+  10:	19 c0       	rjmp	.+50     	; 0x44 <__bad_interrupt>
+  12:	18 c0       	rjmp	.+48     	; 0x44 <__bad_interrupt>
+  14:	17 c0       	rjmp	.+46     	; 0x44 <__bad_interrupt>
+  16:	16 c0       	rjmp	.+44     	; 0x44 <__bad_interrupt>
+  18:	15 c0       	rjmp	.+42     	; 0x44 <__bad_interrupt>
+  1a:	14 c0       	rjmp	.+40     	; 0x44 <__bad_interrupt>
+  1c:	13 c0       	rjmp	.+38     	; 0x44 <__bad_interrupt>
+
+0000001e <__ctors_end>:
+  1e:	11 24       	eor	r1, r1
+  20:	1f be       	out	0x3f, r1	; 63
+  22:	cf e5       	ldi	r28, 0x5F	; 95
+  24:	d2 e0       	ldi	r29, 0x02	; 2
+  26:	de bf       	out	0x3e, r29	; 62
+  28:	cd bf       	out	0x3d, r28	; 61
+
+0000002a <__do_copy_data>:
+  2a:	10 e0       	ldi	r17, 0x00	; 0
+  2c:	a0 e6       	ldi	r26, 0x60	; 96
+  2e:	b0 e0       	ldi	r27, 0x00	; 0
+  30:	e6 eb       	ldi	r30, 0xB6	; 182
+  32:	f1 e0       	ldi	r31, 0x01	; 1
+  34:	02 c0       	rjmp	.+4      	; 0x3a <__do_copy_data+0x10>
+  36:	05 90       	lpm	r0, Z+
+  38:	0d 92       	st	X+, r0
+  3a:	a2 36       	cpi	r26, 0x62	; 98
+  3c:	b1 07       	cpc	r27, r17
+  3e:	d9 f7       	brne	.-10     	; 0x36 <__do_copy_data+0xc>
+  40:	9a d0       	rcall	.+308    	; 0x176 <main>
+  42:	b7 c0       	rjmp	.+366    	; 0x1b2 <_exit>
+
+00000044 <__bad_interrupt>:
+  44:	dd cf       	rjmp	.-70     	; 0x0 <__vectors>
+
+00000046 <goLeft>:
+// P2 - End-stop Left
+// P3 - End-stop Right
+// P4 - Activation switch
+
+void goLeft() {
+	setBit(PORTB, PB0);
+  46:	c0 9a       	sbi	0x18, 0	; 24
+    unsetBit(PORTB, PB1);
+  48:	c1 98       	cbi	0x18, 1	; 24
+  4a:	08 95       	ret
+
+0000004c <goRight>:
+}
+
+void goRight() {
+    unsetBit(PORTB, PB0);
+  4c:	c0 98       	cbi	0x18, 0	; 24
+    setBit(PORTB, PB1);
+  4e:	c1 9a       	sbi	0x18, 1	; 24
+  50:	08 95       	ret
+
+00000052 <isGoingLeft>:
+}
+
+unsigned int isGoingLeft() {
+    return (readBit(PORTB, PB0) != 0) && (readBit(PORTB, PB1) == 0);
+  52:	c0 9b       	sbis	0x18, 0	; 24
+  54:	07 c0       	rjmp	.+14     	; 0x64 <isGoingLeft+0x12>
+  56:	88 b3       	in	r24, 0x18	; 24
+  58:	86 95       	lsr	r24
+  5a:	91 e0       	ldi	r25, 0x01	; 1
+  5c:	89 27       	eor	r24, r25
+  5e:	81 70       	andi	r24, 0x01	; 1
+  60:	90 e0       	ldi	r25, 0x00	; 0
+  62:	08 95       	ret
+  64:	80 e0       	ldi	r24, 0x00	; 0
+  66:	90 e0       	ldi	r25, 0x00	; 0
+}
+  68:	08 95       	ret
+
+0000006a <isGoingRight>:
+
+unsigned int isGoingRight() {
+    return (readBit(PORTB, PB0) == 0) && (readBit(PORTB, PB1) != 0);
+  6a:	c0 99       	sbic	0x18, 0	; 24
+  6c:	05 c0       	rjmp	.+10     	; 0x78 <isGoingRight+0xe>
+  6e:	88 b3       	in	r24, 0x18	; 24
+  70:	86 95       	lsr	r24
+  72:	81 70       	andi	r24, 0x01	; 1
+  74:	90 e0       	ldi	r25, 0x00	; 0
+  76:	08 95       	ret
+  78:	80 e0       	ldi	r24, 0x00	; 0
+  7a:	90 e0       	ldi	r25, 0x00	; 0
+}
+  7c:	08 95       	ret
+
+0000007e <isAtEndStopLeft>:
+
+unsigned int isAtEndStopLeft() {
+    return readBit(PINB, PINB2) == 0;
+  7e:	86 b3       	in	r24, 0x16	; 22
+  80:	86 95       	lsr	r24
+  82:	86 95       	lsr	r24
+  84:	91 e0       	ldi	r25, 0x01	; 1
+  86:	89 27       	eor	r24, r25
+}
+  88:	81 70       	andi	r24, 0x01	; 1
+  8a:	90 e0       	ldi	r25, 0x00	; 0
+  8c:	08 95       	ret
+
+0000008e <isAtEndStopRight>:
+
+unsigned int isAtEndStopRight() {
+    return readBit(PINB, PINB3) == 0;
+  8e:	86 b3       	in	r24, 0x16	; 22
+  90:	86 95       	lsr	r24
+  92:	86 95       	lsr	r24
+  94:	86 95       	lsr	r24
+  96:	91 e0       	ldi	r25, 0x01	; 1
+  98:	89 27       	eor	r24, r25
+}
+  9a:	81 70       	andi	r24, 0x01	; 1
+  9c:	90 e0       	ldi	r25, 0x00	; 0
+  9e:	08 95       	ret
+
+000000a0 <isMoving>:
+
+unsigned int isMoving() {
+    return isGoingLeft() || isGoingRight();
+  a0:	d8 df       	rcall	.-80     	; 0x52 <isGoingLeft>
+  a2:	89 2b       	or	r24, r25
+  a4:	49 f4       	brne	.+18     	; 0xb8 <isMoving+0x18>
+  a6:	e1 df       	rcall	.-62     	; 0x6a <isGoingRight>
+  a8:	31 e0       	ldi	r19, 0x01	; 1
+  aa:	20 e0       	ldi	r18, 0x00	; 0
+  ac:	89 2b       	or	r24, r25
+  ae:	09 f4       	brne	.+2      	; 0xb2 <isMoving+0x12>
+  b0:	30 e0       	ldi	r19, 0x00	; 0
+  b2:	83 2f       	mov	r24, r19
+  b4:	92 2f       	mov	r25, r18
+  b6:	08 95       	ret
+  b8:	81 e0       	ldi	r24, 0x01	; 1
+  ba:	90 e0       	ldi	r25, 0x00	; 0
+}
+  bc:	08 95       	ret
+
+000000be <stop>:
+
+void stop() {
+    // Move away from end-stop
+    if (isGoingLeft() && isAtEndStopLeft()) {
+  be:	c9 df       	rcall	.-110    	; 0x52 <isGoingLeft>
+  c0:	89 2b       	or	r24, r25
+  c2:	29 f0       	breq	.+10     	; 0xce <stop+0x10>
+  c4:	dc df       	rcall	.-72     	; 0x7e <isAtEndStopLeft>
+  c6:	89 2b       	or	r24, r25
+  c8:	11 f0       	breq	.+4      	; 0xce <stop+0x10>
+        goRight();
+  ca:	c0 df       	rcall	.-128    	; 0x4c <goRight>
+  cc:	07 c0       	rjmp	.+14     	; 0xdc <stop+0x1e>
+    }
+    else if (isGoingRight() && isAtEndStopRight()) {
+  ce:	cd df       	rcall	.-102    	; 0x6a <isGoingRight>
+  d0:	89 2b       	or	r24, r25
+  d2:	21 f0       	breq	.+8      	; 0xdc <stop+0x1e>
+  d4:	dc df       	rcall	.-72     	; 0x8e <isAtEndStopRight>
+  d6:	89 2b       	or	r24, r25
+  d8:	09 f0       	breq	.+2      	; 0xdc <stop+0x1e>
+        goLeft();
+  da:	b5 df       	rcall	.-150    	; 0x46 <goLeft>
+	#else
+		//round up by default
+		__ticks_dc = (uint32_t)(ceil(fabs(__tmp)));
+	#endif
+
+	__builtin_avr_delay_cycles(__ticks_dc);
+  dc:	87 e8       	ldi	r24, 0x87	; 135
+  de:	93 e1       	ldi	r25, 0x13	; 19
+  e0:	01 97       	sbiw	r24, 0x01	; 1
+  e2:	f1 f7       	brne	.-4      	; 0xe0 <stop+0x22>
+  e4:	00 c0       	rjmp	.+0      	; 0xe6 <stop+0x28>
+  e6:	00 00       	nop
+    }
+
+    _delay_ms(20);
+
+    unsetBit(PORTB, PB0);
+  e8:	c0 98       	cbi	0x18, 0	; 24
+    unsetBit(PORTB, PB1);
+  ea:	c1 98       	cbi	0x18, 1	; 24
+  ec:	08 95       	ret
+
+000000ee <getActivationSwitchState>:
+}
+
+unsigned int getActivationSwitchState() {
+    unsigned int state = readBit(PINB, PINB4);
+  ee:	26 b3       	in	r18, 0x16	; 22
+  f0:	20 71       	andi	r18, 0x10	; 16
+  f2:	30 e0       	ldi	r19, 0x00	; 0
+
+	while (readBit(PINB, PINB4) == state && state == 0);
+  f4:	86 b3       	in	r24, 0x16	; 22
+  f6:	80 71       	andi	r24, 0x10	; 16
+  f8:	90 e0       	ldi	r25, 0x00	; 0
+  fa:	82 17       	cp	r24, r18
+  fc:	93 07       	cpc	r25, r19
+  fe:	19 f4       	brne	.+6      	; 0x106 <getActivationSwitchState+0x18>
+ 100:	21 15       	cp	r18, r1
+ 102:	31 05       	cpc	r19, r1
+ 104:	b9 f3       	breq	.-18     	; 0xf4 <getActivationSwitchState+0x6>
+
+	return state == 0;
+ 106:	81 e0       	ldi	r24, 0x01	; 1
+ 108:	90 e0       	ldi	r25, 0x00	; 0
+ 10a:	23 2b       	or	r18, r19
+ 10c:	11 f0       	breq	.+4      	; 0x112 <getActivationSwitchState+0x24>
+ 10e:	80 e0       	ldi	r24, 0x00	; 0
+ 110:	90 e0       	ldi	r25, 0x00	; 0
+}
+ 112:	08 95       	ret
+
+00000114 <toggleMotorState>:
+
+// initial direction;
+static int direction = 1;
+
+void toggleMotorState() {
+    if (isMoving()) {
+ 114:	c5 df       	rcall	.-118    	; 0xa0 <isMoving>
+ 116:	89 2b       	or	r24, r25
+ 118:	11 f0       	breq	.+4      	; 0x11e <toggleMotorState+0xa>
+        stop();
+ 11a:	d1 df       	rcall	.-94     	; 0xbe <stop>
+ 11c:	08 95       	ret
+    }
+    else if (isAtEndStopLeft()) {
+ 11e:	af df       	rcall	.-162    	; 0x7e <isAtEndStopLeft>
+ 120:	89 2b       	or	r24, r25
+ 122:	41 f0       	breq	.+16     	; 0x134 <toggleMotorState+0x20>
+        goRight();
+ 124:	93 df       	rcall	.-218    	; 0x4c <goRight>
+
+        direction = -1;
+ 126:	8f ef       	ldi	r24, 0xFF	; 255
+ 128:	9f ef       	ldi	r25, 0xFF	; 255
+ 12a:	90 93 61 00 	sts	0x0061, r25
+ 12e:	80 93 60 00 	sts	0x0060, r24
+ 132:	08 95       	ret
+    }
+    else if (isAtEndStopRight()) {
+ 134:	ac df       	rcall	.-168    	; 0x8e <isAtEndStopRight>
+ 136:	89 2b       	or	r24, r25
+ 138:	41 f0       	breq	.+16     	; 0x14a <toggleMotorState+0x36>
+        goLeft();
+ 13a:	85 df       	rcall	.-246    	; 0x46 <goLeft>
+
+        direction = 1;
+ 13c:	81 e0       	ldi	r24, 0x01	; 1
+ 13e:	90 e0       	ldi	r25, 0x00	; 0
+ 140:	90 93 61 00 	sts	0x0061, r25
+ 144:	80 93 60 00 	sts	0x0060, r24
+ 148:	08 95       	ret
+    }
+    else {
+        if (direction == -1) {
+ 14a:	80 91 60 00 	lds	r24, 0x0060
+ 14e:	90 91 61 00 	lds	r25, 0x0061
+ 152:	01 96       	adiw	r24, 0x01	; 1
+ 154:	41 f4       	brne	.+16     	; 0x166 <toggleMotorState+0x52>
+            goLeft();
+ 156:	77 df       	rcall	.-274    	; 0x46 <goLeft>
+
+            direction = 1;
+ 158:	81 e0       	ldi	r24, 0x01	; 1
+ 15a:	90 e0       	ldi	r25, 0x00	; 0
+ 15c:	90 93 61 00 	sts	0x0061, r25
+ 160:	80 93 60 00 	sts	0x0060, r24
+ 164:	08 95       	ret
+        }
+        else {
+            goRight();
+ 166:	72 df       	rcall	.-284    	; 0x4c <goRight>
+
+            direction = -1;
+ 168:	8f ef       	ldi	r24, 0xFF	; 255
+ 16a:	9f ef       	ldi	r25, 0xFF	; 255
+ 16c:	90 93 61 00 	sts	0x0061, r25
+ 170:	80 93 60 00 	sts	0x0060, r24
+ 174:	08 95       	ret
+
+00000176 <main>:
+	/*
+	 * Direction
+	 */
+
+	// Set PB1 and PB2 as outputs and disable pull-up resistors
+	setBit(DDRB, PB0);
+ 176:	b8 9a       	sbi	0x17, 0	; 23
+	setBit(DDRB, PB1);
+ 178:	b9 9a       	sbi	0x17, 1	; 23
+
+	stop();
+ 17a:	a1 df       	rcall	.-190    	; 0xbe <stop>
+	 */
+
+	// End-stops
+
+	// Set PB3 and PB4 as inputs and enable pull-up resistors
+	unsetBit(DDRB, PB2);
+ 17c:	ba 98       	cbi	0x17, 2	; 23
+	unsetBit(DDRB, PB3);
+ 17e:	bb 98       	cbi	0x17, 3	; 23
+
+	setBit(PORTB, PB2);
+ 180:	c2 9a       	sbi	0x18, 2	; 24
+	setBit(PORTB, PB3);
+ 182:	c3 9a       	sbi	0x18, 3	; 24
+
+	// Activation switch
+
+	// Set PB5 as input and enable pull-up resistor
+	unsetBit(DDRB, DDB4);
+ 184:	bc 98       	cbi	0x17, 4	; 23
+	setBit(PORTB, PB4);
+ 186:	c4 9a       	sbi	0x18, 4	; 24
+
+	for (;;) {
+		 if (isGoingLeft() && isAtEndStopLeft()) {
+ 188:	64 df       	rcall	.-312    	; 0x52 <isGoingLeft>
+ 18a:	89 2b       	or	r24, r25
+ 18c:	29 f0       	breq	.+10     	; 0x198 <main+0x22>
+ 18e:	77 df       	rcall	.-274    	; 0x7e <isAtEndStopLeft>
+ 190:	89 2b       	or	r24, r25
+ 192:	11 f0       	breq	.+4      	; 0x198 <main+0x22>
+            stop();
+ 194:	94 df       	rcall	.-216    	; 0xbe <stop>
+ 196:	f8 cf       	rjmp	.-16     	; 0x188 <main+0x12>
+        }
+        else if (isGoingRight() && isAtEndStopRight()) {
+ 198:	68 df       	rcall	.-304    	; 0x6a <isGoingRight>
+ 19a:	89 2b       	or	r24, r25
+ 19c:	29 f0       	breq	.+10     	; 0x1a8 <main+0x32>
+ 19e:	77 df       	rcall	.-274    	; 0x8e <isAtEndStopRight>
+ 1a0:	89 2b       	or	r24, r25
+ 1a2:	11 f0       	breq	.+4      	; 0x1a8 <main+0x32>
+            stop();
+ 1a4:	8c df       	rcall	.-232    	; 0xbe <stop>
+ 1a6:	f0 cf       	rjmp	.-32     	; 0x188 <main+0x12>
+        }
+        else if (getActivationSwitchState()) {
+ 1a8:	a2 df       	rcall	.-188    	; 0xee <getActivationSwitchState>
+ 1aa:	89 2b       	or	r24, r25
+ 1ac:	69 f3       	breq	.-38     	; 0x188 <main+0x12>
+            toggleMotorState();
+ 1ae:	b2 df       	rcall	.-156    	; 0x114 <toggleMotorState>
+ 1b0:	eb cf       	rjmp	.-42     	; 0x188 <main+0x12>
+
+000001b2 <_exit>:
+ 1b2:	f8 94       	cli
+
+000001b4 <__stop_program>:
+ 1b4:	ff cf       	rjmp	.-2      	; 0x1b4 <__stop_program>
