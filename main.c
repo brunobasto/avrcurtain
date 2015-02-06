@@ -59,10 +59,16 @@ void stop() {
 
 unsigned int getActivationSwitchState() {
     unsigned int state = readBit(PINB, PINB4);
+	
+	uint8_t c = 0;
 
-	while (readBit(PINB, PINB4) == state && state == 0);
+	while (readBit(PINB, PINB4) == state && state == 0)  {
+		_delay_ms(10);
 
-	return state == 0;
+		c++;
+	}
+
+	return state == 0 && c >= 50;
 }
 
 // initial direction;
